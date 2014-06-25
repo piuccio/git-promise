@@ -1,7 +1,7 @@
 {
   "name": "git-promise",
   "description": "Simple wrapper to run any git command and process it's output using promises.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "https://github.com/piuccio/git-promise",
   "author": {
     "name": "Fabio Crisci",
@@ -34,7 +34,7 @@
   ],
   "dependencies": {
     "q": "~1.0.1",
-    "shelljs": "~0.2.6"
+    "shelljs": "~0.3.0"
   },
   "devDependencies": {
     "nodeunit": "~0.8.6"

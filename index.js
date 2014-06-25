@@ -1,20 +1,35 @@
 var shell = require("shelljs");
+var originalSilent = shell.config.silent;
 var Q = require("q");
 
-module.exports = function (command, callback) {
+module.exports = function (command, options, callback) {
 	var deferred = Q.defer();
 
 	if (command.substring(0, 4) !== "git ") {
 		command = "git " + command;
 	}
+	for (var i = 1; i < arguments.length; i += 1) {
+		var arg = arguments[i];
+		if (typeof arg === "function") {
+			callback = arg;
+		} else if (typeof arg === "object") {
+			options = arg;
+		}
+	}
+	if (!callback) {
+		// If we completely ignore the command, resolve with the command output
+		callback = function (stdout) {
+			return stdout;
+		};
+	}
+
+	if (options && options.cwd) {
+		shell.config.silent = true;
+		shell.pushd(options.cwd);
+		shell.config.silent = originalSilent;
+	}
 	shell.exec(command, {silent: true}, function (code, output) {
 		var args;
-		if (!callback) {
-			// If we completely ignore the command, resolve with the command output
-			callback = function (stdout) {
-				return stdout;
-			};
-		}
 
 		if (callback.length === 1) {
 			// Automatically handle non 0 exit codes
@@ -30,6 +45,11 @@ module.exports = function (command, callback) {
 		}
 
 		try {
+			if (options && options.cwd) {
+				shell.config.silent = true;
+				shell.popd();
+				shell.config.silent = originalSilent;
+			}
 			deferred.resolve(callback.apply(null, args));
 		} catch (ex) {
 			deferred.reject(ex);

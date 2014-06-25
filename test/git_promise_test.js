@@ -66,7 +66,7 @@ exports["callback with only one parameter"] = {
 		};
 
 		git("status", function (output) {
-			test.ok(/# On branch \w+/i.test(output));
+			test.ok(/On branch \w+/i.test(output));
 
 			// This is what we resolve, allows to parse the output
 			return resolveTo;
@@ -106,7 +106,7 @@ exports["callback with two parameters"] = {
 		test.expect(4);
 
 		git("status", function (output, code) {
-			test.ok(/# On branch \w+/i.test(output));
+			test.ok(/On branch \w+/i.test(output));
 			test.equal(code, 0, "Working code");
 
 			// Throw an exception here to make it fail
@@ -116,6 +116,27 @@ exports["callback with two parameters"] = {
 		}).fail(function (err) {
 			test.ok(err instanceof Error, "error must be an Error");
 			test.ok(/at least the command was fine/i.test(err.message), err.message);
+		}).fin(function () {
+			test.done();
+		});
+	}
+};
+
+exports["options"] = {
+	cwd: function(test) {
+		test.expect(3);
+
+		var thisFolder = process.cwd();
+
+		git("blame me", {
+			cwd: "test/blame"
+		}, function (output, code) {
+			test.ok(/blame me/i.test(output));
+			test.equal(code, 0, "Working code");
+		}).then(function (what) {
+			test.equal(process.cwd(), thisFolder, "Should go back to the previous path");
+		}).fail(function (err) {
+			test.ok(false, "Because we change working directory");
 		}).fin(function () {
 			test.done();
 		});

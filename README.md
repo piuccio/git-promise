@@ -104,6 +104,20 @@ findForkCommit().then(findChanges).then(function (commits) {
 });
 ```
 
+### Working directory
+
+By default all git commands run in the current working directory (i.e. `process.cwd()`).
+
+You can use the following syntax to run a git command in different folder
+
+```js
+var git = require("git-promise");
+
+git("blame file1.js", {cwd: "src/"}).then(function () {
+  // Blame someone
+});
+```
+
 ## Utility methods
 
 This module comes with some utility methods to parse the output of some git commands
@@ -151,4 +165,5 @@ git("merge-tree <root-commit> <branch1> <branch2>").then(function (stdout) {
 
 ## Release History
 
+* 0.2.0 Change current working directory
 * 0.1.0 Just started
