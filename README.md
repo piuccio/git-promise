@@ -128,7 +128,7 @@ var util = require("git-promise/util");
 
 * `util.extractStatus(output [, lineSeparator])`
 
-Parse the output of `git status --procelain` and returns an object with
+Parse the output of `git status --porcelain` and returns an object with
 
 ```
 {
