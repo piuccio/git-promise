@@ -31,6 +31,29 @@ git("merge origin/master").then(function () {
 });
 ```
 
+`err` is an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) object augmented with `stdout` property. The following code:
+
+```js
+git('clone http://example.org/notExistingExample.git').fail(function (err) {
+  console.log("MESSAGE");
+  console.log(err.message);
+  console.log("STDOUT");
+  console.log(err.stdout);
+});
+```
+
+will log:
+
+```
+MESSAGE
+'git clone http://example.org/notExistingExample.git' exited with error code 128
+STDOUT
+Cloning into 'notExistingExample'...
+fatal: remote error: Repository does not exist
+The requested repository does not exist, or you do not have permission to
+access it.
+```
+
 ## Advanced usage
 
 The `git` command accepts a second parameter that can be used to parse the output or to deal with non 0 exit code.
