@@ -141,6 +141,18 @@ git("blame file1.js", {cwd: "src/"}).then(function () {
 });
 ```
 
+### Custom git executable
+
+By default any command tries to use `git` in `$PATH`, if you have installed `git` in a funky location you can override this value using `gitExec`.
+
+```js
+var git = require("git-promise");
+
+git("status", {gitExec: "/usr/local/sbin/git"}).then(function () {
+  // All good, I guess
+});
+```
+
 ## Utility methods
 
 This module comes with some utility methods to parse the output of some git commands

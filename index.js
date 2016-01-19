@@ -22,6 +22,9 @@ module.exports = function (command, options, callback) {
 			return stdout;
 		};
 	}
+	if (options && options.gitExec) {
+		command = command.replace(/^git/, options.gitExec);
+	}
 
 	if (options && options.cwd) {
 		shell.config.silent = true;
