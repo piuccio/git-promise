@@ -66,7 +66,11 @@ exports["callback with only one parameter"] = {
 		};
 
 		git("status", function (output) {
-			test.ok(/On branch \w+/i.test(output));
+			if (process.env.TRAVIS === "true") {
+				test.ok(/HEAD detached/i.test(output));
+			} else {
+				test.ok(/On branch \w+/i.test(output));
+			}
 
 			// This is what we resolve, allows to parse the output
 			return resolveTo;
@@ -106,7 +110,11 @@ exports["callback with two parameters"] = {
 		test.expect(4);
 
 		git("status", function (output, code) {
-			test.ok(/On branch \w+/i.test(output));
+			if (process.env.TRAVIS === "true") {
+				test.ok(/HEAD detached/i.test(output));
+			} else {
+				test.ok(/On branch \w+/i.test(output));
+			}
 			test.equal(code, 0, "Working code");
 
 			// Throw an exception here to make it fail
