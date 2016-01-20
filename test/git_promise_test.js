@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var git = require("../index.js");
 
@@ -66,7 +66,11 @@ exports["callback with only one parameter"] = {
 		};
 
 		git("status", function (output) {
-			test.ok(/On branch \w+/i.test(output));
+			if (process.env.TRAVIS === "true") {
+				test.ok(/HEAD detached/i.test(output));
+			} else {
+				test.ok(/On branch \w+/i.test(output));
+			}
 
 			// This is what we resolve, allows to parse the output
 			return resolveTo;
@@ -96,7 +100,7 @@ exports["callback with two parameters"] = {
 			return resolveTo;
 		}).then(function (what) {
 			test.deepEqual(what, resolveTo);
-		}).fail(function (err) {
+		}).fail(function () {
 			test.ok(false, "Because we control the output this should not fail");
 		}).fin(function () {
 			test.done();
@@ -106,7 +110,11 @@ exports["callback with two parameters"] = {
 		test.expect(4);
 
 		git("status", function (output, code) {
-			test.ok(/On branch \w+/i.test(output));
+			if (process.env.TRAVIS === "true") {
+				test.ok(/HEAD detached/i.test(output));
+			} else {
+				test.ok(/On branch \w+/i.test(output));
+			}
 			test.equal(code, 0, "Working code");
 
 			// Throw an exception here to make it fail
@@ -137,6 +145,20 @@ exports["options"] = {
 			test.equal(process.cwd(), thisFolder, "Should go back to the previous path");
 		}).fail(function (err) {
 			test.ok(false, "Because we change working directory");
+		}).fin(function () {
+			test.done();
+		});
+	},
+
+	gitExec: function (test) {
+		test.expect(1);
+
+		git("banana", {
+			gitExec: "echo"
+		}).then(function (output) {
+			test.equal(output.trim(), "banana");
+		}).fail(function () {
+			test.ok(false, "Promise should be resolved correctly");
 		}).fin(function () {
 			test.done();
 		});
