@@ -131,7 +131,7 @@ exports["callback with two parameters"] = {
 };
 
 exports["options"] = {
-	cwd: function(test) {
+	"cwd with valid command": function(test) {
 		test.expect(3);
 
 		var thisFolder = process.cwd();
@@ -145,6 +145,20 @@ exports["options"] = {
 			test.equal(process.cwd(), thisFolder, "Should go back to the previous path");
 		}).fail(function (err) {
 			test.ok(false, "Because we change working directory");
+		}).fin(function () {
+			test.done();
+		});
+	},
+
+	"cwd with invalid command": function(test) {
+		test.expect(1);
+
+		var thisFolder = process.cwd();
+
+		git("banana", {
+			cwd: "test/blame"
+		}).fail(function (err) {
+			test.equal(process.cwd(), thisFolder, "Should go back to the previous path on failure");
 		}).fin(function () {
 			test.done();
 		});
