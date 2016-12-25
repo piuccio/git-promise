@@ -1,7 +1,7 @@
 {
   "name": "git-promise",
   "description": "Simple wrapper to run any git command and process it's output using promises.",
-  "version": "0.3.1",
+  "version": "0.3.0",
   "homepage": "https://github.com/piuccio/git-promise",
   "author": {
     "name": "Fabio Crisci",

@@ -200,6 +200,5 @@ git("merge-tree <root-commit> <branch1> <branch2>").then(function (stdout) {
 
 ## Release History
 
-* 0.3.1 Fix current working directory not switching back when command exits with error
 * 0.2.0 Change current working directory
 * 0.1.0 Just started
