@@ -34,6 +34,13 @@ module.exports = function (command, options, callback) {
 	shell.exec(command, {silent: true}, function (code, output) {
 		var args;
 
+		// If cwd was changed earlier, then change it back to process' root directory
+		if (options && options.cwd) {
+			shell.config.silent = true;
+			shell.popd();
+			shell.config.silent = originalSilent;
+		}
+
 		if (callback.length === 1) {
 			// Automatically handle non 0 exit codes
 			if (code !== 0) {
@@ -48,11 +55,6 @@ module.exports = function (command, options, callback) {
 		}
 
 		try {
-			if (options && options.cwd) {
-				shell.config.silent = true;
-				shell.popd();
-				shell.config.silent = originalSilent;
-			}
 			deferred.resolve(callback.apply(null, args));
 		} catch (ex) {
 			deferred.reject(ex);
