@@ -5,12 +5,17 @@ module.exports = (test) => {
 	test("ignore callback - error", async () => {
 		await assert.rejects(
 			() => git("please fail"),
-			/git please fail.*exited with error code \d+/i,
+			/please.*is not a git command/i,
 		);
 	});
 
 	test("ignore callback - works", async () => {
 		const output = await git("init");
+		assert.ok(/Reinitialized existing Git repository/i.test(output), output);
+	});
+
+	test("ignore callback - array input", async () => {
+		const output = await git(["init"]);
 		assert.ok(/Reinitialized existing Git repository/i.test(output), output);
 	});
 
@@ -24,7 +29,7 @@ module.exports = (test) => {
 			assert.fail(`Callback shouldn't be called, got: ${output}`);
 		await assert.rejects(
 			() => git("please fail again", callback),
-			/git please fail.*exited with error code \d+/i,
+			/please.*is not a git command/i,
 		);
 	});
 
@@ -55,11 +60,12 @@ module.exports = (test) => {
 		};
 		let called = false;
 
-		const result = await git("please fail one more time", (output, code) => {
+		const result = await git("please fail one more time", (output, error) => {
 			called = true;
-			// Because we show interest in the error code, this will be resolved
-			assert.ok(/.please.\sis not a git command/i.test(output), output);
-			assert.equal(code, 1, "Failing code");
+			assert.ok(error instanceof Error, "Expecting an error");
+			// Because we show interest in the error, this will be resolved
+			assert.equal(error.code, 1, "Failing code");
+			assert.ok(/please.*is not a git command/i.test(error.message), error.message);
 
 			return resolveTo;
 		});
@@ -68,13 +74,13 @@ module.exports = (test) => {
 	});
 
 	test("callback with two parameters - works", async () => {
-		const callback = (output, code) => {
+		const callback = (output, error) => {
 			if (process.env.TRAVIS === "true") {
 				assert.ok(/HEAD detached/i.test(output));
 			} else {
 				assert.ok(/On branch \w+/i.test(output));
 			}
-			assert.equal(code, 0, "Working code");
+			assert.equal(error, null, "Working code");
 
 			// Throw an exception here to make it fail
 			throw new Error("at least the command was fine");
@@ -92,9 +98,9 @@ module.exports = (test) => {
 		};
 
 		let called = false;
-		const callback = (output, code) => {
+		const callback = (output, error) => {
 			assert.ok(/blame me/i.test(output));
-			assert.equal(code, 0, "Working code");
+			assert.equal(error, null, "Working code");
 			called = true;
 		};
 
@@ -111,7 +117,7 @@ module.exports = (test) => {
 
 		await assert.rejects(
 			() => git("banana", options),
-			/git banana.*exited with error code \d+/i,
+			/banana.*is not a git command+/i,
 		);
 		assert.equal(process.cwd(), thisFolder, "Should go back to the previous path on failure");
 	});
