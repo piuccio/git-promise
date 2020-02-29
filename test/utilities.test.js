@@ -65,7 +65,7 @@ module.exports = (test) => {
 			"  our    100644 e4205621569964b7a09d9948d7109e12952d99ea another",
 			"@@ -1 +0,0 @@",
 			"-Just some more text",
-			"\ No newline at end of file",
+			" No newline at end of file",
 			"added in remote",
 			"  their  100644 8c957964464e8a1ef05bde12ac30784875305e69 some_file",
 			"@@ -0,0 +1,11 @@",

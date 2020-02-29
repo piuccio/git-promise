@@ -1,6 +1,3 @@
-/* globals require */
-var url = require("url");
-
 function pushUniq (array, value) {
 	if (array.indexOf(value) === -1) {
 		array.push(value);

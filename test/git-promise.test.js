@@ -20,7 +20,8 @@ module.exports = (test) => {
 	});
 
 	test("callback with only one parameter - error", async () => {
-		const callback = (output) => assert.fail("Callback shouldn't be called");
+		const callback = (output) =>
+			assert.fail(`Callback shouldn't be called, got: ${output}`);
 		await assert.rejects(
 			() => git("please fail again", callback),
 			/git please fail.*exited with error code \d+/i,
@@ -45,7 +46,7 @@ module.exports = (test) => {
 			return resolveTo;
 		});
 		assert.deepEqual(result, resolveTo);
-		assert.ok(called, 'Callback was not called');
+		assert.ok(called, "Callback was not called");
 	});
 
 	test("callback with two parameters - error", async () => {
@@ -63,11 +64,11 @@ module.exports = (test) => {
 			return resolveTo;
 		});
 		assert.deepEqual(result, resolveTo);
+		assert.ok(called, "Callback was not called");
 	});
 
 	test("callback with two parameters - works", async () => {
 		const callback = (output, code) => {
-			called = true;
 			if (process.env.TRAVIS === "true") {
 				assert.ok(/HEAD detached/i.test(output));
 			} else {
@@ -97,8 +98,9 @@ module.exports = (test) => {
 			called = true;
 		};
 
-		const result = await git("blame me", options, callback);
+		await git("blame me", options, callback);
 		assert.equal(process.cwd(), thisFolder, "Should go back to the previous path");
+		assert.ok(called, "Callback was not called");
 	});
 
 	test("options - cwd with invalid command", async () => {
