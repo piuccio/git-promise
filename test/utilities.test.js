@@ -1,8 +1,7 @@
-'use strict';
+const assert = require("assert");
+const util = require("../util.js");
 
-var util = require("../util.js");
-
-var message = [
+const message = [
 	"## branch_name",
 	" M work_mod_1",
 	" D work_del_1",
@@ -25,7 +24,7 @@ var message = [
 	""
 ];
 
-var expected = {
+const expected = {
 	branch: "branch_name",
 	index: {
 		modified : ["index_mod_1", "index_mod_work_mod", "index_mod_work_del"],
@@ -43,32 +42,24 @@ var expected = {
 	}
 };
 
-exports["git status"] = {
-	porcelain: function(test) {
-		test.expect(1);
-		var result = util.extractStatus(message.join("\n"));
-		test.deepEqual(result, expected);
-		test.done();
-	},
-	porcelain_z: function (test) {
-		test.expect(1);
-		var result = util.extractStatus(message.join("\0"));
-		test.deepEqual(result, expected);
-		test.done();
-	},
-	specify_separator: function(test) {
-		test.expect(1);
-		var result = util.extractStatus(message.join("____"), "____");
-		test.deepEqual(result, expected);
-		test.done();
-	},
-};
+module.exports = (test) => {
+	test("git status - porcelain", () => {
+		const result = util.extractStatus(message.join("\n"));
+		assert.deepEqual(result, expected);
+	});
 
+	test("git status - porcelain z", () => {
+		const result = util.extractStatus(message.join("\0"));
+		assert.deepEqual(result, expected);
+	});
 
-exports["git merge"] = {
-	"no file overlap": function(test) {
-		test.expect(1);
-		var output = [
+	test("git status - specify separator", () => {
+		const result = util.extractStatus(message.join("____"), "____");
+		assert.deepEqual(result, expected);
+	});
+
+	test("git merge - no file overlap", () => {
+		const output = [
 			"removed in remote",
 			"  base   100644 e4205621569964b7a09d9948d7109e12952d99ea another",
 			"  our    100644 e4205621569964b7a09d9948d7109e12952d99ea another",
@@ -80,13 +71,12 @@ exports["git merge"] = {
 			"@@ -0,0 +1,11 @@",
 			"+Some text here for the diff"
 		].join("\n");
-		var result = util.hasConflict(output);
-		test.ok(!result, "No conflict");
-		test.done();
-	},
-	"overlap with trivial merge": function (test) {
-		test.expect(1);
-		var output = [
+		const result = util.hasConflict(output);
+		assert.ok(!result, "No conflict");
+	});
+
+	test("git merge - overlap with trivial merge", () => {
+		const output = [
 			"added in both",
 			"  our    100644 5aae37291277543a057e6b55aa505b8bea04985a some_file",
 			"  their  100644 2f1f67c9946390e33c668b2631f03b8cb6cca8b2 some_file",
@@ -109,13 +99,12 @@ exports["git merge"] = {
 			"+change it now and here",
 			"+>>>>>>> .their"
 		].join("\n");
-		var result = util.hasConflict(output);
-		test.ok(!result, "No conflict");
-		test.done();
-	},
-	"merge conflict": function(test) {
-		test.expect(1);
-		var output = [
+		const result = util.hasConflict(output);
+		assert.ok(!result, "No conflict");
+	});
+
+	test("git merge - merge conflict", () => {
+		const output = [
 			"changed in both",
 			"  base   100644 8c957964464e8a1ef05bde12ac30784875305e69 some_file",
 			"  our    100644 86975e50d423e88ed3c4dac48915b0fe40c81a36 some_file",
@@ -129,8 +118,7 @@ exports["git merge"] = {
 			" text here",
 			" and some other here"
 		].join("\n");
-		var result = util.hasConflict(output);
-		test.ok(result, "Conflict");
-		test.done();
-	},
+		const result = util.hasConflict(output);
+		assert.ok(result, "Conflict");
+	});
 };
