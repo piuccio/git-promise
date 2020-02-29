@@ -6,6 +6,9 @@ fs.readdir(__dirname, async (err, files) => {
   for (let fileName of files.filter((_) => _.endsWith(".test.js"))) {
     const test = baretest(fileName);
     require(`./${fileName}`)(test);
-    await test.run();
+    const success = await test.run();
+    if (success === false) {
+      process.exit(1);
+    }
   }
 });

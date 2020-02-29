@@ -1,64 +1,45 @@
-var shell = require("shelljs");
-var originalSilent = shell.config.silent;
-var Q = require("q");
+const util = require("util");
+const execFile = util.promisify(require("child_process").execFile);
 
-module.exports = function (command, options, callback) {
-	var deferred = Q.defer();
+const defaultCallback = (stdout) => stdout;
+const defaultOptions = {};
+const isString = (_) => typeof _ === "string";
+const isObject = (_) => typeof _ === "object";
+const isFunction = (_) => typeof _ === "function";
 
-	if (command.substring(0, 4) !== "git ") {
-		command = "git " + command;
-	}
-	for (var i = 1; i < arguments.length; i += 1) {
-		var arg = arguments[i];
-		if (typeof arg === "function") {
-			callback = arg;
-		} else if (typeof arg === "object") {
-			options = arg;
-		}
-	}
-	if (!callback) {
-		// If we completely ignore the command, resolve with the command output
-		callback = function (stdout) {
-			return stdout;
-		};
-	}
-	if (options && options.gitExec) {
-		command = command.replace(/^git/, options.gitExec);
-	}
+module.exports = function (commandOrArgs, optionsOrCallback, callbackMaybe) {
+	const callback = [
+		optionsOrCallback,
+		callbackMaybe,
+		defaultCallback,
+	].find(isFunction);
+	const options = [
+		optionsOrCallback,
+		callbackMaybe,
+		defaultOptions,
+	].find(isObject);
 
-	if (options && options.cwd) {
-		shell.config.silent = true;
-		shell.pushd(options.cwd);
-		shell.config.silent = originalSilent;
+	// Strip `git ` from the beginning since it's reduntant
+	if (isString(commandOrArgs) && commandOrArgs.startsWith("git ")) {
+		commandOrArgs = commandOrArgs.substring(4);
 	}
-	shell.exec(command, {silent: true}, function (code, output) {
-		var args;
-
-		// If cwd was changed earlier, then change it back to process' root directory
-		if (options && options.cwd) {
-			shell.config.silent = true;
-			shell.popd();
-			shell.config.silent = originalSilent;
-		}
-
-		if (callback.length === 1) {
-			// Automatically handle non 0 exit codes
-			if (code !== 0) {
-				var error = new Error("'" + command + "' exited with error code " + code);
-				error.stdout = output;
-				return deferred.reject(error);
+	const execBinary = options.gitExec || "git";
+	const execOptions = {
+		cwd: options.cwd,
+		windowsHide: true,
+	};
+	const execArguments = isString(commandOrArgs)
+		? commandOrArgs.split(" ")
+		: commandOrArgs;
+	return execFile(execBinary, execArguments, execOptions).then(
+		({stdout}) => callback(stdout, null),
+		(error) => {
+			if (callback.length === 1) {
+				throw error;
+			} else {
+				// The callback is interested in the error, try to catch it.
+				return callback("", error);
 			}
-			args = [output];
-		} else {
-			// This callback is interested in the exit code, don't handle exit code
-			args = [output, code];
-		}
-
-		try {
-			deferred.resolve(callback.apply(null, args));
-		} catch (ex) {
-			deferred.reject(ex);
-		}
-	});
-	return deferred.promise;
+		},
+	);
 };
