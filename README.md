@@ -2,6 +2,30 @@
 
 Simple wrapper that allows you to run any `git` command using a more intuitive syntax.
 
+> **Warning**
+>
+> Please be cautious and aware of potential command injection vulnerabilities
+> that will become an attack vector if user input flows unsanitized and
+> uncontrolled into the `git()` function call.
+>
+> For example:
+> ```js
+> const git = require("git-promise");
+> git("fetch origin --upload-pack=touch	/tmp/abcd", {cwd: '/tmp/example-git-repo'}).then((output) => console.log(output))
+> ```
+>
+> or consider the following input
+> 
+> ```js
+> const git = require("git-promise");
+> git("fetch origin --upload-pack=touch${IFS}/tmp/abcd-new", {cwd: '/tmp/example-git-repo'}).then((output) => console.log(output))
+> ```
+> 
+> both of these serve as an example where user input will result in
+> command injection attacks that create a new empty file at `/tmp/abcd` or `/tmp/abcd-new`.
+>
+> See [original security disclosure report](https://gist.github.com/lirantal/9da1fceb32f5279eb76a5fc1cb9707dd) for further context.
+
 ## Getting Started
 
 ```shell
